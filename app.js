@@ -19,8 +19,6 @@ var getLatestPlaylist = function() {
 
     return new Promise(function (fulfill, reject) {
 
-        var playlistRe = /New Day (.*?) (.*?)/i;
-
         spotifyApi.getUserPlaylists(spotifyUserId)
             .then(function(data) {
 
@@ -29,7 +27,7 @@ var getLatestPlaylist = function() {
                 var latestPlaylist;
 
                 playlists.some(function(pl) {
-                    var match = pl.name.match(playlistRe);
+                    var match = pl.name.match(config.spotify.searchRegex);
 
                     if (match) {
                         latestPlaylist = pl;
