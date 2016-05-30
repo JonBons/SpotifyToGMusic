@@ -27,7 +27,7 @@ var getLatestPlaylist = function() {
                 var latestPlaylist;
 
                 playlists.some(function(pl) {
-                    var match = pl.name.match(config.spotify.searchRegex);
+                    var match = config.spotify.searchComparison(pl);
 
                     if (match) {
                         latestPlaylist = pl;
@@ -35,44 +35,50 @@ var getLatestPlaylist = function() {
 
                     return match;
                 }, this);
+                
+                if (typeof latestPlaylist !== 'undefined') {
 
-                var res = {id: latestPlaylist.id, name: latestPlaylist.name, songs: []};
+                    var res = {id: latestPlaylist.id, name: latestPlaylist.name, songs: []};
 
-                spotifyApi.getPlaylist(spotifyUserId, latestPlaylist.id)
-                    .then(function(data) {
+                    spotifyApi.getPlaylist(spotifyUserId, latestPlaylist.id)
+                        .then(function(data) {
 
-                        //console.log(data.body);
+                            //console.log(data.body);
 
-                        var tracks = data.body.tracks.items;
+                            var tracks = data.body.tracks.items;
 
-                        var songs = [];
-                        var idx = 0;
+                            var songs = [];
+                            var idx = 0;
 
-                        tracks.forEach(function(o) {
-                            var track = o.track;
+                            tracks.forEach(function(o) {
+                                var track = o.track;
 
-                            var artists = [];
-                            track.artists.forEach(function(a) {
-                                artists.push(a.name);
-                            })
+                                var artists = [];
+                                track.artists.forEach(function(a) {
+                                    artists.push(a.name);
+                                })
 
-                            var song = {Index: idx, Title: track.name, Artists: artists, Album: track.album.name};
-                            songs.push(song);
+                                var song = {Index: idx, Title: track.name, Artists: artists, Album: track.album.name};
+                                songs.push(song);
 
-                            idx++;
+                                idx++;
 
-                            //console.log(song);
-                        }, this);
+                                //console.log(song);
+                            }, this);
 
-                        res.songs = songs;
+                            res.songs = songs;
 
-                        fulfill(res);
+                            fulfill(res);
 
-                        //console.log(songs.length);
+                            //console.log(songs.length);
 
-                    }, function(err) {
-                        reject(err);
-                    });
+                        }, function(err) {
+                            reject(err);
+                        });
+                        
+                } else {
+                    reject('Unable to find playlist that matches criteria');
+                }
 
             }, function(err) {
                 reject(err);
